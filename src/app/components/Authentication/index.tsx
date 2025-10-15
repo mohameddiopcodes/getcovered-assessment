@@ -149,7 +149,7 @@ export default function Authentication({ authForm, isVisible, onToggle }: Authen
                     <p>Summary:</p>
                     <ul>
                       <li>{authForm.passwordInputs.length + authForm.otherInputs.length} inputs found</li>
-                      <li>Examples: {authForm.otherInputs.map(input => input.name || input.id || input.type).slice(0, 6).join(', ')}</li>
+                      <li>Example: {authForm.otherInputs.map(input => input.name || input.id || input.type).slice(0, 6).join(', ')}</li>
                     </ul>
                   </div>
                   <h4>Authentication Inputs:</h4>
