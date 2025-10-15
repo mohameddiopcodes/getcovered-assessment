@@ -2,6 +2,16 @@
 
 A Next.js application that analyzes websites to detect authentication forms. The app scrapes HTML content, identifies login/signup forms, and provides an analysis of its structure and input elements.
 
+## 📹 Tutorial Video
+
+**Watch the tutorial to see the application in action:**
+
+[![Tutorial Video](https://img.youtube.com/vi/hbh9Z970_Jc/maxresdefault.jpg)](https://youtu.be/hbh9Z970_Jc)
+
+### 🎬 [Watch on YouTube](https://youtu.be/hbh9Z970_Jc)
+
+> **Note**: The video demonstrates the complete workflow from URL input to detection and analysis. It shows real-time usage of all features including form detection and viewing the authentication component's source code.
+
 ## 🚀 Features
 
 ### Core Functionality
