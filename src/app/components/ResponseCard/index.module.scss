@@ -41,6 +41,9 @@
 .url {
     position: relative;
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     
     small {
         color: #888;
@@ -51,6 +54,7 @@
         text-overflow: ellipsis;
         display: block;
         line-height: 1.4;
+        flex: 1;
     }
     
     &::before {
@@ -60,6 +64,35 @@
         color: #888;
         font-size: 0.8rem;
         font-weight: bold;
+    }
+}
+
+.copyButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+    
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    &:active {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+.copyIcon {
+    width: 16px;
+    height: 16px;
+    filter: invert(1); // Invert the black icon to white
+    transition: opacity 0.2s ease;
+    
+    &:hover {
+        opacity: 0.8;
     }
 }
 
@@ -156,11 +189,11 @@
 
 .authFound {
     color: #28a745;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .authNotFound {
-    color: #aeaeae;
+    color: #a64444;
     font-weight: 500;
 }
 

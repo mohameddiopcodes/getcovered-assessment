@@ -14,9 +14,19 @@
   margin-top: 1rem;
 
   & i {
-    font-size: 1rem;
+    margin-top: .1em;
+    font-size: .9rem;
     display: block;
     opacity: .5;
+    font-weight: 500;
+  }
+
+  & p {
+    font-size: .8rem;
+    opacity: .5;
+    margin-top: 1em;
+    text-align: center;
+    font-weight: 500;
   }
 }
 
@@ -43,7 +53,7 @@
 .formSection {
   z-index: 100;
   position: fixed;
-  bottom: 0;
+  bottom: 10px;
   left: 0;
   right: 0;
   padding-bottom: 30px;
@@ -63,6 +73,10 @@
     background: transparent;
     left: auto;
     right: 0;
+
+    & footer {
+      display: none;
+    }
   }
 }
 
@@ -294,7 +308,6 @@
   transition: all 0.2s ease;
   backdrop-filter: blur(4px);
   pointer-events: auto; // Ensure click events work
-  border: 1px solid white;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
 
   &:hover {
@@ -329,6 +342,15 @@
   flex-shrink: 0;
   transition: height 0.3s ease-in-out;
   padding-bottom: 200px;
+}
+
+.formFooter {
+  & p {
+    font-size: .75rem;
+    opacity: .4;
+    text-align: center;
+    font-weight: 500;
+  }
 }
 
 @media only screen and (max-width: 768px) {

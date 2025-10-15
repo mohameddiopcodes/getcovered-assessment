@@ -93,8 +93,17 @@ export default function Authentication({ authForm, isVisible, onToggle }: Authen
         <button 
           className={styles.toggleButton}
           onClick={onToggle}
+          title={isVisible ? "Hide details" : "Show details"}
         >
-          {isVisible ? 'Hide' : 'Show'}
+          {isVisible ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 15l-6-6-6 6"/>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          )}
         </button>
       </div>
 
@@ -149,7 +158,7 @@ export default function Authentication({ authForm, isVisible, onToggle }: Authen
                     <p>Summary:</p>
                     <ul>
                       <li>{authForm.passwordInputs.length + authForm.otherInputs.length} inputs found</li>
-                      <li>Example: {authForm.otherInputs.map(input => input.name || input.id || input.type).slice(0, 6).join(', ')}</li>
+                      <li>Example: {authForm.otherInputs.map(input => input.name || input.id || input.type).slice(0, 6).join(', ') || 'N/A'}</li>
                     </ul>
                   </div>
                   <h4>Authentication Inputs:</h4>

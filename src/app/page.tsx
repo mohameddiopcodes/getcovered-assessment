@@ -289,6 +289,9 @@ export default function Home() {
                 URLs added: {urls.length}/5
               </div>
             )}
+                <footer className={styles.formFooter}>
+                  <p>some authentication forms may remain undetected due to restricted access.</p>
+                </footer>
             </form>
           </div>
         </div>

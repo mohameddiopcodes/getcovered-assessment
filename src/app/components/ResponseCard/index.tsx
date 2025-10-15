@@ -97,6 +97,24 @@ export default function ResponseCard({
             
             <div className={styles.url}>
                 <small>{url}</small>
+                <button 
+                    className={styles.copyButton}
+                    onClick={async () => {
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            // You could add a toast notification here if needed
+                        } catch (err) {
+                            console.error('Failed to copy URL:', err);
+                        }
+                    }}
+                    title="Copy URL to clipboard"
+                >
+                    <img 
+                        src="/copy.png" 
+                        alt="Copy" 
+                        className={styles.copyIcon}
+                    />
+                </button>
             </div>
 
             {!htmlResponse && !error && (
