@@ -30,15 +30,14 @@ function hasAuthenticationContext($: cheerio.CheerioAPI, $input: any): boolean {
   const parentText = $parent.text().toLowerCase();
   const formText = $form.length ? $form.text().toLowerCase() : '';
   
-  // Look for authentication-related text patterns
-  const authTextPatterns = [
+  // Look for strong authentication-related text patterns
+  const strongAuthTextPatterns = [
     'sign in', 'signin', 'log in', 'login', 'log in to',
-    'enter your password', 'password', 'username', 'email',
-    'forgot password', 'reset password', 'create account',
-    'authentication', 'credentials', 'access'
+    'enter your password', 'forgot password', 'reset password', 
+    'create account', 'sign up', 'register'
   ];
   
-  const hasAuthText = authTextPatterns.some(pattern => 
+  const hasStrongAuthText = strongAuthTextPatterns.some(pattern => 
     parentText.includes(pattern) || formText.includes(pattern)
   );
   
@@ -46,25 +45,31 @@ function hasAuthenticationContext($: cheerio.CheerioAPI, $input: any): boolean {
   const $nearbyButtons = $parent.find('button, input[type="submit"], a').add($form.find('button, input[type="submit"], a'));
   const buttonText = $nearbyButtons.text().toLowerCase();
   
-  const authButtonPatterns = [
-    'sign in', 'signin', 'log in', 'login', 'submit',
-    'continue', 'next', 'enter', 'access'
+  // STRICT: Look for strong authentication button patterns only
+  const strongAuthButtonPatterns = [
+    'sign in', 'signin', 'log in', 'login', 'sign up', 'register'
   ];
   
-  const hasAuthButton = authButtonPatterns.some(pattern => 
+  const hasStrongAuthButton = strongAuthButtonPatterns.some(pattern => 
     buttonText.includes(pattern)
   );
   
-  return hasAuthText || hasAuthButton;
+  // STRICT: Require BOTH strong text AND strong button context
+  return hasStrongAuthText && hasStrongAuthButton;
 }
 
 export function parseHtmlForAuthForms(html: string): AuthForm {
   const $ = cheerio.load(html);
-  // Find all inputs that contain "email" or "password" textually in their attributes
+  
+  // FLEXIBLE REQUIREMENT: Look for authentication indicators
+  // 1. Direct password inputs (most reliable)
+  const passwordInputs = $('input[type="password"]');
+  
+  // 2. Look for strong authentication context even without password inputs
+  // (for multipart auth, social login, etc.)
   const allInputs = $('input');
-  const authInputs = allInputs.filter((_, element) => {
+  const potentialAuthInputs = allInputs.filter((_, element) => {
     const $input = $(element);
-    // Get all relevant attributes, handling undefined values properly
     const attributes = [
       $input.attr('name'),
       $input.attr('id'),
@@ -84,44 +89,26 @@ export function parseHtmlForAuthForms(html: string): AuthForm {
         return true;
     }
     
-    // Special case: Check for inputs that might be password fields but don't have type="password"
-    // This can happen with dynamic forms or obfuscated code
-    const inputValue = $input.attr('value') || '';
-    const isPasswordField = 
-      attributes.includes('password') ||
-      attributes.includes('pass') ||
-      attributes.includes('pwd') ||
-      (inputValue && inputValue.length > 0 && attributes.includes('hidden')); // Hidden password fields
-    
-    // Check for authentication-related keywords in attributes
-    const authKeywords = [
-      'password', 'pass', 'passwd', 'pwd',
-      'email', 'username', 'user', 'login', 'signin', 'sign-in',
-      'authentication', 'auth', 'credential'
+    // Check for strong authentication keywords in attributes
+    const strongAuthKeywords = [
+      'email', 'username', 'user', 'login', 'signin', 'sign-in'
     ];
     
-    const hasAuthKeyword = authKeywords.some(keyword => 
+    const hasStrongAuthKeyword = strongAuthKeywords.some(keyword => 
       attributes.includes(keyword)
     );
     
-    // Check for common authentication patterns
-    const hasAuthPattern = 
-      attributes.includes('current-password') ||
-      attributes.includes('new-password') ||
-      attributes.includes('username') ||
-      attributes.includes('email') ||
-      attributes.includes('login') ||
-      attributes.includes('signin');
+    // Check for strong authentication context (nearby text, buttons, etc.)
+    const hasStrongContext = hasAuthenticationContext($ as cheerio.CheerioAPI, $input);
     
-    // Check for authentication context (nearby text, buttons, etc.)
-    const hasContext = hasAuthenticationContext($ as cheerio.CheerioAPI, $input);
-    
-    return isPasswordField || hasAuthKeyword || hasAuthPattern || hasContext;
+    return hasStrongAuthKeyword && hasStrongContext;
   });
   
-  const hasPasswordInput = authInputs.length > 0;
+  // REQUIREMENT: Must have either password inputs OR strong auth context with email/username
+  const hasPasswordInputs = passwordInputs.length > 0;
+  const hasStrongAuthContext = potentialAuthInputs.length > 0;
   
-  if (!hasPasswordInput) {
+  if (!hasPasswordInputs && !hasStrongAuthContext) {
     return {
       hasPasswordInput: false,
       formElement: null,
@@ -131,6 +118,11 @@ export function parseHtmlForAuthForms(html: string): AuthForm {
       otherInputs: []
     };
   }
+  
+  // Combine all authentication-related inputs
+  const authInputs = potentialAuthInputs;
+  
+  const hasPasswordInput = hasPasswordInputs; // True if we found password inputs
 
   const authForm: AuthForm = {
     hasPasswordInput: true,
@@ -230,13 +222,18 @@ export function parseHtmlForAuthForms(html: string): AuthForm {
       // Check if this parent contains password inputs
       const hasPassword = $parent.find('input[type="password"]').length > 0;
 
-      // Only consider parents that have BOTH email/username AND password inputs
-      if (hasEmailUsername && hasPassword) {
+      // FLEXIBLE: Consider parents that have either:
+      // 1. Both email/username AND password inputs (traditional auth), OR
+      // 2. Strong email/username context (multipart auth, social login, etc.)
+      const isTraditionalAuth = hasEmailUsername && hasPassword;
+      const isMultipartAuth = hasEmailUsername && !hasPassword; // Strong email/username context without password
+      
+      if (isTraditionalAuth || isMultipartAuth) {
         // Count total inputs in this parent (excluding hidden inputs)
         const totalInputsInParent = $parent.find('input').not('input[type="hidden"]').length;
 
-        // Calculate score: prioritize parents with more inputs (more comprehensive)
-        const score = totalInputsInParent;
+        // Calculate score: prioritize traditional auth, then by input count
+        const score = isTraditionalAuth ? totalInputsInParent + 100 : totalInputsInParent;
 
         // If this parent has a better score (more comprehensive), use it
         if (score > bestParentScore || !bestParent) {
@@ -281,6 +278,35 @@ export function parseHtmlForAuthForms(html: string): AuthForm {
   
   authForm.passwordInputs = uniquePasswordInputs;
   authForm.otherInputs = uniqueOtherInputs;
+
+  // FINAL VALIDATION: Ensure we have a legitimate authentication form
+  // For multipart auth: Must have either password inputs OR strong email/username context
+  const finalHasPasswordInputs = authForm.passwordInputs.length > 0;
+  const finalHasEmailUsernameInputs = authForm.otherInputs.some(input => {
+    const name = (input.name || '').toLowerCase();
+    const id = (input.id || '').toLowerCase();
+    const placeholder = (input.placeholder || '').toLowerCase();
+    const type = (input.type || '').toLowerCase();
+    
+    return type === 'email' || 
+           name.includes('email') || name.includes('username') || name.includes('user') ||
+           id.includes('email') || id.includes('username') || id.includes('user') ||
+           placeholder.includes('email') || placeholder.includes('username');
+  });
+
+  // FLEXIBLE VALIDATION: Accept if we have either:
+  // 1. Password inputs (traditional auth), OR
+  // 2. Strong email/username context (multipart auth, social login, etc.)
+  if (!finalHasPasswordInputs && !finalHasEmailUsernameInputs) {
+    return {
+      hasPasswordInput: false,
+      formElement: null,
+      parentElement: null,
+      inputCount: 0,
+      passwordInputs: [],
+      otherInputs: []
+    };
+  }
 
   return authForm;
 }
