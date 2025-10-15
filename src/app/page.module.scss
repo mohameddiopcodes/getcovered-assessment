@@ -328,6 +328,7 @@
   padding: 0 2em; // Keep padding but ensure we can scroll past it
   flex-shrink: 0;
   transition: height 0.3s ease-in-out;
+  padding-bottom: 200px;
 }
 
 @media only screen and (max-width: 768px) {
