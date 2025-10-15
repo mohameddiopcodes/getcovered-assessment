@@ -1,0 +1,145 @@
+.toaster {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+    min-width: 300px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    gap: 12px;
+}
+
+.message {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #333;
+    position: relative;
+    padding-left: 8px;
+    
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 16px;
+        border-radius: 2px;
+    }
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+        opacity: 1;
+        color: #333;
+        background: rgba(0, 0, 0, 0.05);
+    }
+}
+
+.success {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(34, 197, 94, 0.3);
+    
+    .message {
+        color: #333;
+    }
+    
+    .message::before {
+        background: #22c55e;
+    }
+    
+    .closeButton {
+        color: #666;
+        
+        &:hover {
+            color: #333;
+            background: rgba(0, 0, 0, 0.05);
+        }
+    }
+}
+
+.error {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(239, 68, 68, 0.3);
+    
+    .message {
+        color: #333;
+    }
+    
+    .message::before {
+        background: #ef4444;
+    }
+    
+    .closeButton {
+        color: #666;
+        
+        &:hover {
+            color: #333;
+            background: rgba(0, 0, 0, 0.05);
+        }
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+    .toaster {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        min-width: auto;
+    }
+}
